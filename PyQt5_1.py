@@ -23,17 +23,26 @@ class MyMplCanvas(FigureCanvas):
     def compute_initial_figure(self):
         pass
     
-class MyStaticMplCanvas(MyMplCanvas):
-    """Simple canvas with a sine plot."""
+class MyDynamicMplCanvas(MyMplCanvas):
+    """A canvas that updates itself every second with a new plot."""
+
+    def __init__(self, *args, **kwargs):
+        MyMplCanvas.__init__(self, *args, **kwargs)
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(self.update_figure)
+        timer.start(1)
 
     def compute_initial_figure(self):
-        t = linspace(1525,1900,20)
-        s = sin(2*pi*t)
-        self.axes.plot(t, s)
-        self.axes.set_xlabel('Time[t]')
-        self.axes.set_ylabel('Time[t]')
-        self.axes.set_title('Time[t]')
+        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
 
+    def update_figure(self):
+        # Build a list of 4 random integers between 0 and 10 (both inclusive)
+        l = [np.random.randint(0, 10) for i in range(4)]
+        self.axes.cla()
+        self.axes.plot([0, 1, 2, 3], l, 'r')
+        self.draw()
+        
+        
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -55,7 +64,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
         l = QtWidgets.QHBoxLayout(self.widget)
-        sc = MyStaticMplCanvas(self.widget, width=1, height=100, dpi=100)
+        sc = MyDynamicMplCanvas(self.widget, width=1, height=100, dpi=100)
         l.addWidget(sc)
 
     def retranslateUi(self, MainWindow):
